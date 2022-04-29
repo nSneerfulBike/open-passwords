@@ -4,7 +4,7 @@ if [ ! -d "../build" ]; then
     mkdir ../build
 fi
 
-g++ -o ../build/main \
+g++ -std=c++17 -o ../build/main \
 *.cpp \
 ../headers/cpp-base64/base64.cpp \
 ../headers/clip/clip.cpp ../headers/clip/clip_x11.cpp ../headers/clip/image.cpp \
