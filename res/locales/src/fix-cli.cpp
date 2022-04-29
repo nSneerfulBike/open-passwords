@@ -24,7 +24,7 @@ std::string read_file(std::string path);
 int main() {
     std::vector<std::string> locales;
     for (auto entry : std::filesystem::directory_iterator(SEARCH_PATH)) {
-        std::string locale = entry.path();
+        std::string locale = entry.path().u8string();
         if (locale.find(EXTENSION_STRING) == std::string::npos) continue;
 
         int pos0 = locale.find(EXTENSION_STRING);

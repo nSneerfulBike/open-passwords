@@ -37,7 +37,7 @@ std::string generate_hex_values(std::string txt);
 int main() {
     std::vector<std::string> paths;
     for (auto entry : std::filesystem::directory_iterator(SEARCH_PATH))
-        paths.push_back(entry.path());
+        paths.push_back(entry.path().u8string());
 
     std::vector<std::string> namespaces;
     namespaces.push_back(generate_namespace(EN_US_PATH, true));
