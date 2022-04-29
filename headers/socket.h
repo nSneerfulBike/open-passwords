@@ -1,6 +1,6 @@
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <unistd.h>
+// #include <arpa/inet.h>
+// #include <netinet/in.h>
+// #include <unistd.h>
 
 #include <array>
 #include <cstdlib>
@@ -71,80 +71,81 @@ std::vector<std::string> get_ip_addresses() {
 }
 
 void share_passwords(std::string passwords_raw, int port = DEFAULT_PORT) {
-    int server_fd;
-    int opt = 1;
-    struct sockaddr_in address;
-    int addrlen = sizeof(address);
-    int new_socket;
+    // int server_fd;
+    // int opt = 1;
+    // struct sockaddr_in address;
+    // int addrlen = sizeof(address);
+    // int new_socket;
 
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        throw "socket error";
-    }
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-                   sizeof(opt))) {
-        throw "socket options error";
-    }
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
+    // if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    //     throw "socket error";
+    // }
+    // if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
+    //                sizeof(opt))) {
+    //     throw "socket options error";
+    // }
+    // address.sin_family = AF_INET;
+    // address.sin_addr.s_addr = INADDR_ANY;
+    // address.sin_port = htons(port);
 
-    if (bind(server_fd, (struct sockaddr *)(&address), sizeof(address)) < 0) {
-        throw "bind error";
-    }
-    if (listen(server_fd, 3) < 0) {
-        throw "listen error";
-    }
+    // if (bind(server_fd, (struct sockaddr *)(&address), sizeof(address)) < 0) {
+    //     throw "bind error";
+    // }
+    // if (listen(server_fd, 3) < 0) {
+    //     throw "listen error";
+    // }
 
-    std::string passwords_b64 = b64::encode(passwords_raw) + '\0';
+    // std::string passwords_b64 = b64::encode(passwords_raw) + '\0';
 
-    std::cout
-        << "Connect to this device using one of the following IP addresses:"
-        << std::endl;
-    for (std::string &ip : get_ip_addresses()) {
-        std::cout << ip << std::endl;
-    }
-    std::cout << std::endl << "Waiting for connections..." << std::endl;
-    while (true) {
-        if ((new_socket = accept(server_fd, (struct sockaddr *)(&address),
-                                 (socklen_t *)(&addrlen))) < 0) {
-            throw "accept error";
-        }
+    // std::cout
+    //     << "Connect to this device using one of the following IP addresses:"
+    //     << std::endl;
+    // for (std::string &ip : get_ip_addresses()) {
+    //     std::cout << ip << std::endl;
+    // }
+    // std::cout << std::endl << "Waiting for connections..." << std::endl;
+    // while (true) {
+    //     if ((new_socket = accept(server_fd, (struct sockaddr *)(&address),
+    //                              (socklen_t *)(&addrlen))) < 0) {
+    //         throw "accept error";
+    //     }
 
-        char ip_char[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &address.sin_addr, ip_char, INET_ADDRSTRLEN);
-        std::string ip = ip_char;
+    //     char ip_char[INET_ADDRSTRLEN];
+    //     inet_ntop(AF_INET, &address.sin_addr, ip_char, INET_ADDRSTRLEN);
+    //     std::string ip = ip_char;
 
-        send(new_socket, passwords_b64.c_str(), passwords_b64.length(), 0);
-        close(new_socket);
+    //     send(new_socket, passwords_b64.c_str(), passwords_b64.length(), 0);
+    //     close(new_socket);
 
-        std::cout << "Data sent to device with IP: " << ip << std::endl;
-    }
+    //     std::cout << "Data sent to device with IP: " << ip << std::endl;
+    // }
 }
 
 std::string receive_passwords_raw(struct receive_info ri) {
-    int sock = 0;
-    struct sockaddr_in serv_addr;
-    char buffer[BUFFER_SIZE];
-    std::string res = "";
+    // int sock = 0;
+    // struct sockaddr_in serv_addr;
+    // char buffer[BUFFER_SIZE];
+    // std::string res = "";
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        throw "socket creation error";
-    }
+    // if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    //     throw "socket creation error";
+    // }
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(ri.port);
+    // serv_addr.sin_family = AF_INET;
+    // serv_addr.sin_port = htons(ri.port);
 
-    std::cout << "Scanning \"" << ri.custom_ip << "\"..." << std::endl;
+    // std::cout << "Scanning \"" << ri.custom_ip << "\"..." << std::endl;
 
-    if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
-        throw "unable to connect";
-    }
-    if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) < 0) {
-        throw "unable to connect";
-    }
+    // if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
+    //     throw "unable to connect";
+    // }
+    // if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) < 0) {
+    //     throw "unable to connect";
+    // }
 
-    while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
-    return b64::decode(res);
+    // while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
+    // return b64::decode(res);
+    return "";
 }
 std::vector<pass::password> receive_passwords(struct receive_info ri,
                                               std::string key) {
