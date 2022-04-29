@@ -1,0 +1,22 @@
+{
+    "cli": {
+        "_s_wrong_key": "Wrong key.",
+        "_s_pretty_p_group": "Group:    ",
+        "_s_pretty_p_usern": "Username: ",
+        "_s_pretty_p_passw": "Password: ",
+        "_s_not_enough_arguments": "Not enough arguments.",
+        "_s_index_out_of_range": "The password index cannot be greater than the number of passwords.",
+        "_s_copied_to_clipboard": "*copied to clipboard*",
+        "_s_username_mandatory": "You must input a username.",
+        "_s_group_mandatory": "You must input a group.",
+        "_s_password_added": "Password added successfully.",
+        "_s_password_added_": "Password added successfully: ",
+        "_s_password_removed": "Password removed successfully.",
+        "_s_password_edited": "Password edited successfully.",
+        "_s_wrong_remote_address": "The remote address cannot be reached.",
+        "_s_error_": "Error: ",
+        "_s_passwords_retrieved": "New passwords stored successfully.",
+        "_s_passwords_synced": "Passwords synchronized successfully.",
+        "_s_key_changed": "Key changed successfully."
+    }
+}

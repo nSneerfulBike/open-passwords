@@ -1,0 +1,6 @@
+.vscode
+build
+headers/clip
+headers/base-64
+headers/json
+res/locales/build

@@ -1,0 +1,132 @@
+Open Passwords 1.0.0 (March 10th 2022). Usage:
+
+pass <command> [<args>] [options]
+
+Following are the commands and their args.
+A star (*) before the arg means it is mandatory.
+The round brackets below the arg indicate the default
+value.
+The square brackets below the arg indicate a condition
+for the compulsoriness.
+
+Show a list of saved passwords
+    list
+      -k, --key[=KEY]              the key used to encrypt the
+                                   passwords
+        (-k="")
+      -f, --filter[=FILTER]        regex string to search through
+                                   the passwords
+      -i, --ignore-case[=FILTER]   ignore case sensitivity when
+                                   searching through
+                                   the passwords. Can be used instead
+                                   of [-f, --filter]
+
+Generate a new password without saving it
+    generate
+      --no-lower                   disable generating of lowercase chars
+      --no-upper                   disable generating of uppercase chars
+      --no-numbers                 disable generating of numbers
+      --no-special                 disable generating of special chars
+      -l, --length[=LENGTH]        sets the length for the password
+        (-l=16)
+
+Show the details of a saved password
+    show <n>
+     *n                            the number that identifies the saved
+                                   password
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+
+Copy and show the details of a saved password
+    copy <n>
+     *n                            the number that identifies the saved
+                                   password
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+
+Remove a saved password
+    remove <n>
+     *n                            the number that identifies the saved
+                                   password
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+
+Add new password to the saved ones
+    add
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+     *-g, --group[=GROUP]          the name of the group to which the
+                                   password
+                                   will be added
+     *-u, --user[=USER]            the username for the new password
+     *-p, --password[=PASSWORD]    the actual password to store
+        [only mandatory if [--generate] is not being used]
+      --print                      prints the details of the newly saved
+                                   password
+     *--generate                   generates a new password instead of
+                                   having the user to input it. Overrides
+                                   [-p, --password]
+        [only mandatory if [-p, --password] is not being used]
+      --no-lower                   disable generating of lowercase chars
+      --no-upper                   disable generating of uppercase chars
+      --no-numbers                 disable generating of numbers
+      --no-special                 disable generating of special chars
+      -l, --length[=LENGTH]        sets the length for the password
+        (-l=16)
+
+Edit password from the saved ones
+    edit <n>
+     *n                            the number that identifies the saved
+                                   password
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+     *-g, --group[=GROUP]          the name of the group to which the
+                                   password will be added
+     *-u, --user[=USER]            the username for the new password
+     *-p, --password[=PASSWORD]    the actual password to store
+        [only mandatory if [--generate] is not being used]
+      --print                      prints the details of the newly saved
+                                   password
+     *--generate                   generates a new password instead of
+                                   having the user to input it. Overrides
+                                   [-p, --password]
+        [only mandatory if [-p, --password] is not being used]
+      --no-lower                   disable generating of lowercase chars
+      --no-upper                   disable generating of uppercase chars
+      --no-numbers                 disable generating of numbers
+      --no-special                 disable generating of special chars
+      -l, --length[=LENGTH]        sets the length for the password
+        (-l=16)
+
+Prepare this device to save or sync passwords on another device
+    share
+      --port[=PORT]                sets the port of the running server
+        (--port=8080)
+
+Retrieve passwords from another device and override the existing ones
+(overrides the encryption key as well)
+    retrieve <ip>
+     *ip                           the IP address of the device from which
+                                   the passwords will be retrieved
+      --port[=PORT]                sets the port of the running server
+        (--port=8080)
+
+Synchronizes the passwords with the ones on another device
+    sync <ip>
+     *ip                           the IP address of the device to which the
+                                   passwords will be synced
+      -k, --key[=KEY]              the key used to encrypt the passwords
+        (-k="")
+      --remote-key[=REMOTE_KEY]    the key used to encrypt the passwords
+                                   on the device to which the passwords will
+                                   be synced
+        (--remote-key="")
+      --port[=PORT]                sets the port of the running server
+        (--port=8080)
+
+Changes the key used to encrypt the saved passwords
+    change-key
+      --old[=OLD_KEY]              the current key
+        (--old="")
+      --new[=NEW_KEY]              the new key
+        (--new="")
