@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd cli
-./build.sh
+./linux-build.sh
