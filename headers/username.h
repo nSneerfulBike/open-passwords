@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#ifdef linux
+#ifdef __linux__
 #include <pwd.h>
 #include <unistd.h>
 #endif
@@ -14,7 +14,7 @@
 namespace usr {
 
 std::string get_username() {
-#ifdef linux
+#ifdef __linux__
     uid_t userid;
     struct passwd* pass;
     userid = getuid();

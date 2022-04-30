@@ -15,7 +15,7 @@ class filestore {
     std::string file_path;
 
     std::string get_file_path() {
-#ifdef linux
+#ifdef __linux__
         return ("/home/" + usr::get_username() + "/.passwords");
 #endif
 

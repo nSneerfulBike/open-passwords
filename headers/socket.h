@@ -27,7 +27,7 @@ namespace sock {
 #define pclose _pclose
 #endif
 
-#ifdef linux
+#ifdef __linux__
 #define IP_COMMAND "ifconfig"
 #define IP_SEARCH_STRING "inet "
 #define IP_SEARCH_STRING_PLUS 5
