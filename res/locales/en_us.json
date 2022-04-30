@@ -9,6 +9,7 @@
         "_s_copied_to_clipboard": "*copied to clipboard*",
         "_s_username_mandatory": "You must input a username.",
         "_s_group_mandatory": "You must input a group.",
+        "_s_password_mandatory": "You must input a password.",
         "_s_password_added": "Password added successfully.",
         "_s_password_added_": "Password added successfully: ",
         "_s_password_removed": "Password removed successfully.",

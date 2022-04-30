@@ -376,6 +376,7 @@ void add_password(int argc, char **argv) {
     }
     if (group == nullptr) exit_err(STRING(_s_group_mandatory), 1);
     if (user == nullptr) exit_err(STRING(_s_username_mandatory), 1);
+    if (pass == nullptr) exit_err(STRING(_s_password_mandatory), 1);
     pass::password new_password(*group, *user, *pass, time(0));
     std::vector<pass::password> passwords;
     try {
