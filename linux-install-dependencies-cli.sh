@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd headers
-./install-dependencies.sh
+./linux-install-dependencies.sh
 
 cd ../res/locales/src
 ./build-cli.sh
