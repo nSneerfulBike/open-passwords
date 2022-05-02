@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "../../../headers/json/single_include/nlohmann/json.hpp"
 

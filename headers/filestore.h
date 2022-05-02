@@ -15,14 +15,15 @@ class filestore {
     std::string file_path;
 
     std::string get_file_path() {
+#ifdef __android__
+        return ("/data/data/com.termux/files/home/.passwords");
+#endif
 #ifdef __linux__
         return ("/home/" + usr::get_username() + "/.passwords");
 #endif
-
 #ifdef _WIN32
         return ("C:\\Users\\" + usr::get_username() + "\\.passwords");
 #endif
-
         return "";
     }
 
