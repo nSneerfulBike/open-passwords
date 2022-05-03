@@ -10,11 +10,18 @@
 #include "../headers/utils.h"
 
 #define LIST_COMMAND "list"
+#define LIST_COMMAND_ALIAS "ls"
+#define LIST_COMMAND_ALIAS_ALIAS "l"
 #define GENERATE_COMMAND "generate"
 #define SHOW_COMMAND "show"
+#define SHOW_COMMAND_ALIAS "print"
+#define SHOW_COMMAND_ALIAS_ALIAS "p"
 #define COPY_COMMAND "copy"
+#define COPY_COMMAND_ALIAS "cp"
 #define ADD_COMMAND "add"
+#define ADD_COMMAND_ALIAS "a"
 #define REMOVE_COMMAND "remove"
+#define REMOVE_COMMAND_ALIAS "rm"
 #define EDIT_COMMAND "edit"
 #define SHARE_COMMAND "share"
 #define RETRIEVE_COMMAND "retrieve"
@@ -97,17 +104,17 @@ int main(int argc, char **argv) {
     if (argc <= 1) exit_err(STRING(help_text), 1);
     std::string arg = argv[1];
 
-    if (arg == LIST_COMMAND) {
+    if (arg == LIST_COMMAND || arg == LIST_COMMAND_ALIAS || arg == LIST_COMMAND_ALIAS_ALIAS) {
         list_passwords(argc, argv);
     } else if (arg == GENERATE_COMMAND) {
         generate_password(argc, argv);
-    } else if (arg == SHOW_COMMAND) {
+    } else if (arg == SHOW_COMMAND || arg == SHOW_COMMAND_ALIAS || arg == SHOW_COMMAND_ALIAS_ALIAS) {
         show_password(argc, argv);
-    } else if (arg == COPY_COMMAND) {
+    } else if (arg == COPY_COMMAND || arg == COPY_COMMAND_ALIAS) {
         copy_password(argc, argv);
-    } else if (arg == ADD_COMMAND) {
+    } else if (arg == ADD_COMMAND || arg == ADD_COMMAND_ALIAS) {
         add_password(argc, argv);
-    } else if (arg == REMOVE_COMMAND) {
+    } else if (arg == REMOVE_COMMAND || arg == REMOVE_COMMAND_ALIAS) {
         remove_password(argc, argv);
     } else if (arg == EDIT_COMMAND) {
         edit_password(argc, argv);
