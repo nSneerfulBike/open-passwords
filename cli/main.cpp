@@ -3,6 +3,7 @@
 #include <string>
 
 #include "../headers/clipboard.h"
+#include "../headers/colors.h"
 #include "../headers/filestore.h"
 #include "../headers/locales.h"
 #include "../headers/passwords.h"
@@ -104,11 +105,13 @@ int main(int argc, char **argv) {
     if (argc <= 1) exit_err(STRING(help_text), 1);
     std::string arg = argv[1];
 
-    if (arg == LIST_COMMAND || arg == LIST_COMMAND_ALIAS || arg == LIST_COMMAND_ALIAS_ALIAS) {
+    if (arg == LIST_COMMAND || arg == LIST_COMMAND_ALIAS ||
+        arg == LIST_COMMAND_ALIAS_ALIAS) {
         list_passwords(argc, argv);
     } else if (arg == GENERATE_COMMAND) {
         generate_password(argc, argv);
-    } else if (arg == SHOW_COMMAND || arg == SHOW_COMMAND_ALIAS || arg == SHOW_COMMAND_ALIAS_ALIAS) {
+    } else if (arg == SHOW_COMMAND || arg == SHOW_COMMAND_ALIAS ||
+               arg == SHOW_COMMAND_ALIAS_ALIAS) {
         show_password(argc, argv);
     } else if (arg == COPY_COMMAND || arg == COPY_COMMAND_ALIAS) {
         copy_password(argc, argv);
@@ -194,18 +197,19 @@ void pretty_print_list(std::vector<pass::password> &passwords,
     }
     int j = 0;
     for (int &i : indexes) {
-        std::cout << utils::pretty_space_inv(indexes_str[j++], indexes_spaces)
-                  << ": "
-                  << utils::pretty_space(passwords[i].get_group(),
-                                         usernames_spaces)
-                  << " " << passwords[i].get_user() << std::endl;
+        std::cout << color::yellow(utils::pretty_space_inv(indexes_str[j++],
+                                                           indexes_spaces))
+                  << color::yellow(": ")
+                  << color::cyan(utils::pretty_space(passwords[i].get_group(),
+                                                     usernames_spaces))
+                  << color::cyan(" ") << passwords[i].get_user() << std::endl;
     }
 }
 void pretty_print_password(std::string group, std::string user,
                            std::string pass) {
-    std::cout << STRING(_s_pretty_p_group) << group << std::endl;
-    std::cout << STRING(_s_pretty_p_usern) << user << std::endl;
-    std::cout << STRING(_s_pretty_p_passw) << pass << std::endl;
+    std::cout << color::yellow(STRING(_s_pretty_p_group)) << group << std::endl;
+    std::cout << color::yellow(STRING(_s_pretty_p_usern)) << user << std::endl;
+    std::cout << color::yellow(STRING(_s_pretty_p_passw)) << pass << std::endl;
 }
 
 // argc [0, 1] used in all the following functions
