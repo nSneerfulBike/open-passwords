@@ -21,6 +21,12 @@ std::string pretty_space(std::string str, int n) {
     for (int i = 0; i < spaces; i++) str += " ";
     return str;
 }
+std::string pretty_space_inv(std::string str, int n) {
+    std::string res = "";
+    int spaces = n - str.length();
+    for (int i = 0; i < spaces; i++) res += " ";
+    return res + str;
+}
 
 std::vector<std::string> split(std::string str, char delimiter) {
     std::vector<std::string> res;

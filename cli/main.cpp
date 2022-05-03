@@ -187,7 +187,7 @@ void pretty_print_list(std::vector<pass::password> &passwords,
     }
     int j = 0;
     for (int &i : indexes) {
-        std::cout << utils::pretty_space(indexes_str[j++], indexes_spaces)
+        std::cout << utils::pretty_space_inv(indexes_str[j++], indexes_spaces)
                   << ": "
                   << utils::pretty_space(passwords[i].get_group(),
                                          usernames_spaces)
