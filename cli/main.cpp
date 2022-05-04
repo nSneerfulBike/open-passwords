@@ -189,10 +189,12 @@ void pretty_print_list(std::vector<pass::password> &passwords,
         std::string index_str = std::to_string(i);
         indexes_str.push_back(index_str);
         int new_index_length = index_str.length();
-        if (indexes_spaces < new_index_length) indexes_spaces = new_index_length;
+        if (indexes_spaces < new_index_length)
+            indexes_spaces = new_index_length;
 
         int new_user_length = passwords[i].get_group().length();
-        if (usernames_spaces < new_user_length) usernames_spaces = new_user_length;
+        if (usernames_spaces < new_user_length)
+            usernames_spaces = new_user_length;
     }
     int j = 0;
     for (int &i : indexes) {
