@@ -1,6 +1,6 @@
-// #include <arpa/inet.h>
-// #include <netinet/in.h>
-// #include <unistd.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
 #include <array>
 #include <cstdlib>
@@ -16,6 +16,11 @@ namespace sock {
 
 #define DEFAULT_PORT 8080
 #define BUFFER_SIZE 65535
+
+#define ACTION_SCAN '\x01'
+#define ACTION_PULL '\x02'
+
+#define SCAN_ACTIVE '\x0f'
 
 #ifdef _WIN32
 #define IP_COMMAND "ipconfig"
@@ -71,54 +76,65 @@ std::vector<std::string> get_ip_addresses() {
 }
 
 void share_passwords(std::string passwords_raw, int port = DEFAULT_PORT) {
-    // int server_fd;
-    // int opt = 1;
-    // struct sockaddr_in address;
-    // int addrlen = sizeof(address);
-    // int new_socket;
+    int server_fd;
+    int opt = 1;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+    int new_socket;
 
-    // if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-    //     throw "socket error";
-    // }
-    // if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-    //                sizeof(opt))) {
-    //     throw "socket options error";
-    // }
-    // address.sin_family = AF_INET;
-    // address.sin_addr.s_addr = INADDR_ANY;
-    // address.sin_port = htons(port);
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        throw "socket error";
+    }
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
+                   sizeof(opt))) {
+        throw "socket options error";
+    }
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
 
-    // if (bind(server_fd, (struct sockaddr *)(&address), sizeof(address)) < 0) {
-    //     throw "bind error";
-    // }
-    // if (listen(server_fd, 3) < 0) {
-    //     throw "listen error";
-    // }
+    if (bind(server_fd, (struct sockaddr *)(&address), sizeof(address)) < 0) {
+        throw "bind error";
+    }
+    if (listen(server_fd, 3) < 0) {
+        throw "listen error";
+    }
 
-    // std::string passwords_b64 = b64::encode(passwords_raw) + '\0';
+    std::string passwords_b64 = b64::encode(passwords_raw) + '\0';
 
-    // std::cout
-    //     << "Connect to this device using one of the following IP addresses:"
-    //     << std::endl;
-    // for (std::string &ip : get_ip_addresses()) {
-    //     std::cout << ip << std::endl;
-    // }
-    // std::cout << std::endl << "Waiting for connections..." << std::endl;
-    // while (true) {
-    //     if ((new_socket = accept(server_fd, (struct sockaddr *)(&address),
-    //                              (socklen_t *)(&addrlen))) < 0) {
-    //         throw "accept error";
-    //     }
+    std::cout
+        << "Connect to this device using one of the following IP addresses:"
+        << std::endl;
+    for (std::string &ip : get_ip_addresses()) {
+        std::cout << ip << std::endl;
+    }
+    std::cout << std::endl << "Waiting for connections..." << std::endl;
+    while (true) {
+        if ((new_socket = accept(server_fd, (struct sockaddr *)(&address),
+                                 (socklen_t *)(&addrlen))) < 0) {
+            throw "accept error";
+        }
 
-    //     char ip_char[INET_ADDRSTRLEN];
-    //     inet_ntop(AF_INET, &address.sin_addr, ip_char, INET_ADDRSTRLEN);
-    //     std::string ip = ip_char;
+        char ip_char[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &address.sin_addr, ip_char, INET_ADDRSTRLEN);
+        std::string ip = ip_char;
 
-    //     send(new_socket, passwords_b64.c_str(), passwords_b64.length(), 0);
-    //     close(new_socket);
+        char action[1];
+        read(new_socket, action, 1);
+        switch (action[0]) {
+            case ACTION_SCAN:
+                send(new_socket, std::string("" + SCAN_ACTIVE).c_str(),
+                     std::string("" + SCAN_ACTIVE).length(), 0);
+                break;
 
-    //     std::cout << "Data sent to device with IP: " << ip << std::endl;
-    // }
+            case ACTION_PULL:
+                send(new_socket, passwords_b64.c_str(), passwords_b64.length(),
+                     0);
+                std::cout << "Data sent to device with IP: " << ip << std::endl;
+                break;
+        }
+        close(new_socket);
+    }
 }
 
 std::string receive_passwords_raw(struct receive_info ri) {
@@ -139,7 +155,8 @@ std::string receive_passwords_raw(struct receive_info ri) {
     // if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
     //     throw "unable to connect";
     // }
-    // if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) < 0) {
+    // if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) <
+    // 0) {
     //     throw "unable to connect";
     // }
 
