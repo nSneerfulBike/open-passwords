@@ -135,7 +135,6 @@ class password {
 std::vector<pass::password> file_data_to_passwords(std::string data,
                                                    std::string key) {
     std::string decrypted_str = b64::decode(enc::decrypt(data, key));
-    std::cout << decrypted_str << std::endl;
     nlohmann::json json_data = nlohmann::json::parse(decrypted_str);
 
     std::vector<pass::password> arr;
