@@ -135,23 +135,24 @@ class password {
 std::vector<pass::password> file_data_to_passwords(std::string data,
                                                    std::string key) {
     std::string decrypted_str = b64::decode(enc::decrypt(data, key));
+    std::cout << decrypted_str << std::endl;
     nlohmann::json json_data = nlohmann::json::parse(decrypted_str);
 
     std::vector<pass::password> arr;
-    for (int i = 0; i < json_data.size(); i++)
-        arr.push_back(pass::password(json_data[i]["group"],
-                                     json_data[i]["user"], json_data[i]["pass"],
-                                     json_data[i]["time"]));
+    for (int i = 0; i < json_data["passwords"].size(); i++)
+        arr.push_back(pass::password(json_data["passwords"][i]["group"],
+                                     json_data["passwords"][i]["user"], json_data["passwords"][i]["pass"],
+                                     json_data["passwords"][i]["time"]));
     return arr;
 }
 std::string passwords_to_file_data(std::vector<pass::password>& passwords,
                                    std::string key) {
     nlohmann::json json_data;
     for (int i = 0; i < passwords.size(); i++) {
-        json_data.push_back({{"group", passwords[i].get_group()},
-                             {"user", passwords[i].get_user()},
-                             {"pass", passwords[i].get_pass()},
-                             {"time", passwords[i].get_time()}});
+        json_data["passwords"].push_back({{"group", passwords[i].get_group()},
+                                          {"user", passwords[i].get_user()},
+                                          {"pass", passwords[i].get_pass()},
+                                          {"time", passwords[i].get_time()}});
     }
     return enc::encrypt(b64::encode(json_data.dump()), key);
 }
