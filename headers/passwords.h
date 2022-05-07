@@ -141,7 +141,8 @@ std::vector<pass::password> file_data_to_passwords(std::string data,
     std::vector<pass::password> arr;
     for (int i = 0; i < json_data["passwords"].size(); i++)
         arr.push_back(pass::password(json_data["passwords"][i]["group"],
-                                     json_data["passwords"][i]["user"], json_data["passwords"][i]["pass"],
+                                     json_data["passwords"][i]["user"],
+                                     json_data["passwords"][i]["pass"],
                                      json_data["passwords"][i]["time"]));
     return arr;
 }
