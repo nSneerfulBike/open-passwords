@@ -198,19 +198,19 @@ void pretty_print_list(std::vector<pass::password> &passwords,
     }
     int j = 0;
     for (int &i : indexes) {
-        std::cout << color::yellow(utils::pretty_space_inv(indexes_str[j++],
-                                                           indexes_spaces))
-                  << color::yellow(": ")
-                  << color::cyan(utils::pretty_space(passwords[i].get_group(),
-                                                     usernames_spaces))
+        std::cout << color::bold(color::yellow(utils::pretty_space_inv(
+                         indexes_str[j++], indexes_spaces)))
+                  << color::bold(color::yellow(": "))
+                  << color::bold(color::cyan(utils::pretty_space(
+                         passwords[i].get_group(), usernames_spaces)))
                   << color::cyan(" ") << passwords[i].get_user() << std::endl;
     }
 }
 void pretty_print_password(std::string group, std::string user,
                            std::string pass) {
-    std::cout << color::yellow(STRING(_s_pretty_p_group)) << group << std::endl;
-    std::cout << color::yellow(STRING(_s_pretty_p_usern)) << user << std::endl;
-    std::cout << color::yellow(STRING(_s_pretty_p_passw)) << pass << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_group))) << group << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_usern))) << user << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_passw))) << pass << std::endl;
 }
 
 // argc [0, 1] used in all the following functions
