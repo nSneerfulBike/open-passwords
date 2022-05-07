@@ -20,6 +20,7 @@ namespace sock {
 #define ACTION_SCAN '\x01'
 #define ACTION_PULL '\x02'
 
+#define ACTIONS_LEN 1
 #define SCAN_ACTIVE '\x0f'
 
 #ifdef _WIN32
@@ -120,11 +121,11 @@ void share_passwords(std::string passwords_raw, int port = DEFAULT_PORT) {
         std::string ip = ip_char;
 
         char action[1];
-        read(new_socket, action, 1);
+        read(new_socket, action, ACTIONS_LEN);
         switch (action[0]) {
             case ACTION_SCAN:
-                send(new_socket, std::string("" + SCAN_ACTIVE).c_str(),
-                     std::string("" + SCAN_ACTIVE).length(), 0);
+                action[0] = SCAN_ACTIVE;
+                send(new_socket, action, ACTIONS_LEN, 0);
                 break;
 
             case ACTION_PULL:
@@ -155,14 +156,14 @@ std::string receive_passwords_raw(struct receive_info ri) {
     if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
         throw "unable to connect";
     }
-    if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) <
-    0) {
+    if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) < 0) {
         throw "unable to connect";
     }
 
+    char action[1] = {ACTION_PULL};
+    send(sock, action, ACTIONS_LEN, 0);
     while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
     return b64::decode(res);
-    return "";
 }
 std::vector<pass::password> receive_passwords(struct receive_info ri,
                                               std::string key) {
