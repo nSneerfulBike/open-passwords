@@ -138,30 +138,30 @@ void share_passwords(std::string passwords_raw, int port = DEFAULT_PORT) {
 }
 
 std::string receive_passwords_raw(struct receive_info ri) {
-    // int sock = 0;
-    // struct sockaddr_in serv_addr;
-    // char buffer[BUFFER_SIZE];
-    // std::string res = "";
+    int sock = 0;
+    struct sockaddr_in serv_addr;
+    char buffer[BUFFER_SIZE];
+    std::string res = "";
 
-    // if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    //     throw "socket creation error";
-    // }
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        throw "socket creation error";
+    }
 
-    // serv_addr.sin_family = AF_INET;
-    // serv_addr.sin_port = htons(ri.port);
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(ri.port);
 
-    // std::cout << "Scanning \"" << ri.custom_ip << "\"..." << std::endl;
+    std::cout << "Scanning \"" << ri.custom_ip << "\"..." << std::endl;
 
-    // if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
-    //     throw "unable to connect";
-    // }
-    // if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) <
-    // 0) {
-    //     throw "unable to connect";
-    // }
+    if (inet_pton(AF_INET, ri.custom_ip.c_str(), &serv_addr.sin_addr) <= 0) {
+        throw "unable to connect";
+    }
+    if (connect(sock, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) <
+    0) {
+        throw "unable to connect";
+    }
 
-    // while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
-    // return b64::decode(res);
+    while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
+    return b64::decode(res);
     return "";
 }
 std::vector<pass::password> receive_passwords(struct receive_info ri,
