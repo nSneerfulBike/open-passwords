@@ -61,7 +61,8 @@ bool filter_matches(std::string group, std::string user, std::string filter,
 }
 
 std::string now() {
-    auto today = std::chrono::floor<date::days>(std::chrono::_V2::system_clock::now());
+    auto today =
+        std::chrono::floor<date::days>(std::chrono::_V2::system_clock::now());
     return date::format("%F", today);
 }
 
