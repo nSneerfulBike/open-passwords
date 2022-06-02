@@ -3,4 +3,5 @@ build
 headers/clip
 headers/cpp-base64
 headers/json
+headers/date
 res/locales/build

@@ -5,6 +5,8 @@
 #include <thread>
 #include <vector>
 
+#include "./date/include/date/date.h"
+
 namespace utils {
 
 void sleep(long ms) {
@@ -56,6 +58,11 @@ bool filter_matches(std::string group, std::string user, std::string filter,
         }
     }
     return true;
+}
+
+std::string now() {
+    auto today = std::chrono::floor<date::days>(std::chrono::_V2::system_clock::now());
+    return date::format("%F", today);
 }
 
 }  // namespace utils
