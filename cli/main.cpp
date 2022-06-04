@@ -24,6 +24,10 @@
 #define REMOVE_COMMAND "remove"
 #define REMOVE_COMMAND_ALIAS "rm"
 #define EDIT_COMMAND "edit"
+#define BACKUP_COMMAND "backup"
+#define BACKUP_LIST_COMMAND "backup-list"
+#define REMOVE_BACKUP_COMMAND "remove-backup"
+#define RESTORE_COMMAND "restore"
 #define SHARE_COMMAND "share"
 #define RETRIEVE_COMMAND "retrieve"
 #define SYNC_COMMAND "sync"
@@ -58,6 +62,9 @@
 #define EXCLUDE_UPPER_OPT "--no-upper"
 #define EXCLUDE_NUMBERS_OPT "--no-numbers"
 #define EXCLUDE_SPECIAL_OPT "--no-special"
+
+#define NAME_OPT "--name"
+#define NAME_OPT_ALIAS "-n"
 
 #define OLD_OPT "--old"
 #define NEW_OPT "--new"
@@ -94,6 +101,10 @@ void copy_password(int argc, char **argv);
 void add_password(int argc, char **argv);
 void remove_password(int argc, char **argv);
 void edit_password(int argc, char **argv);
+void backup_passwords(int argc, char **argv);
+void list_backups(int argc, char **argv);
+void remove_backup(int argc, char **argv);
+void restore_backup(int argc, char **argv);
 void share_passwords(int argc, char **argv);
 void retrieve_passwords(int argc, char **argv);
 void sync_passwords(int argc, char **argv);
@@ -121,6 +132,14 @@ int main(int argc, char **argv) {
         remove_password(argc, argv);
     } else if (arg == EDIT_COMMAND) {
         edit_password(argc, argv);
+    } else if (arg == BACKUP_COMMAND) {
+        backup_passwords(argc, argv);
+    } else if (arg == BACKUP_LIST_COMMAND) {
+        list_backups(argc, argv);
+    } else if (arg == REMOVE_BACKUP_COMMAND) {
+        remove_backup(argc, argv);
+    } else if (arg == RESTORE_COMMAND) {
+        restore_backup(argc, argv);
     } else if (arg == SHARE_COMMAND) {
         share_passwords(argc, argv);
     } else if (arg == RETRIEVE_COMMAND) {
@@ -208,9 +227,20 @@ void pretty_print_list(std::vector<pass::password> &passwords,
 }
 void pretty_print_password(std::string group, std::string user,
                            std::string pass) {
-    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_group))) << group << std::endl;
-    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_usern))) << user << std::endl;
-    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_passw))) << pass << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_group))) << group
+              << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_usern))) << user
+              << std::endl;
+    std::cout << color::bold(color::yellow(STRING(_s_pretty_p_passw))) << pass
+              << std::endl;
+}
+void pretty_print_backups(
+    std::map<std::string, std::vector<pass::password>> backups) {
+    for (std::map<std::string, std::vector<pass::password>>::iterator it =
+             backups.begin();
+         it != backups.end(); it++) {
+        std::cout << it->first << std::endl;
+    }
 }
 
 // argc [0, 1] used in all the following functions
@@ -232,23 +262,23 @@ void list_passwords(int argc, char **argv) {
               if (next != nullptr) filter = *next;
           }}});
 
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
     std::vector<int> indexes;
-    for (int i = 0; i < passwords.size(); i++) {
+    for (int i = 0; i < pd.passwords.size(); i++) {
         if (filter == "") {
             indexes.push_back(i);
-        } else if (utils::filter_matches(passwords[i].get_group(),
-                                         passwords[i].get_user(), filter,
+        } else if (utils::filter_matches(pd.passwords[i].get_group(),
+                                         pd.passwords[i].get_user(), filter,
                                          ignore_case)) {
             indexes.push_back(i);
         }
     }
-    pretty_print_list(passwords, indexes);
+    pretty_print_list(pd.passwords, indexes);
 }
 void generate_password(int argc, char **argv) {
     pass::settings settings;
@@ -289,15 +319,15 @@ void show_password(int argc, char **argv) {
                      if (next != nullptr) key = *next;
                  }}});
 
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    if (index_to_show >= passwords.size())
+    if (index_to_show >= pd.passwords.size())
         exit_err(STRING(_s_index_out_of_range), 1);
-    pass::password *password = &passwords[index_to_show];
+    pass::password *password = &pd.passwords[index_to_show];
     pretty_print_password(password->get_group(), password->get_user(),
                           password->get_pass());
 }
@@ -312,15 +342,15 @@ void copy_password(int argc, char **argv) {
                      if (next != nullptr) key = *next;
                  }}});
 
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    if (index_to_copy >= passwords.size())
+    if (index_to_copy >= pd.passwords.size())
         exit_err(STRING(_s_index_out_of_range), 1);
-    pass::password *password = &passwords[index_to_copy];
+    pass::password *password = &pd.passwords[index_to_copy];
     cb::copy_to_clipboard(password->get_pass());
     pretty_print_password(password->get_group(), password->get_user(),
                           STRING(_s_copied_to_clipboard));
@@ -390,14 +420,14 @@ void add_password(int argc, char **argv) {
     if (user == nullptr) exit_err(STRING(_s_username_mandatory), 1);
     if (pass == nullptr) exit_err(STRING(_s_password_mandatory), 1);
     pass::password new_password(*group, *user, *pass, time(0));
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    passwords.push_back(new_password);
-    filestore.write_file(passwords, key);
+    pd.passwords.push_back(new_password);
+    filestore.write_file(pd, key);
 
     if (print)
         std::cout << STRING(_s_password_added_) << *pass << std::endl;
@@ -416,16 +446,16 @@ void remove_password(int argc, char **argv) {
                      if (next != nullptr) key = *next;
                  }}});
 
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    if (index_to_remove >= passwords.size())
+    if (index_to_remove >= pd.passwords.size())
         exit_err(STRING(_s_index_out_of_range), 1);
-    passwords.erase(passwords.begin() + index_to_remove);
-    filestore.write_file(passwords, key);
+    pd.passwords.erase(pd.passwords.begin() + index_to_remove);
+    filestore.write_file(pd, key);
 
     std::cout << STRING(_s_password_removed) << std::endl;
 }
@@ -493,18 +523,18 @@ void edit_password(int argc, char **argv) {
         if (pass != nullptr) delete pass;
         pass = new std::string(pass::generate_password(settings));
     }
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(key);
+        pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    pass::password *new_password = &passwords[index_to_edit];
+    pass::password *new_password = &pd.passwords[index_to_edit];
     if (group != nullptr) new_password->set_group(*group);
     if (user != nullptr) new_password->set_user(*user);
     if (pass != nullptr) new_password->set_pass(*pass);
     new_password->set_time(time(0));
-    filestore.write_file(passwords, key);
+    filestore.write_file(pd, key);
 
     std::cout << STRING(_s_password_edited);
     if (print)
@@ -512,6 +542,120 @@ void edit_password(int argc, char **argv) {
     else
         std::cout << ".";
     std::cout << std::endl;
+}
+void backup_passwords(int argc, char **argv) {
+    std::string key = "";
+    std::string *name = nullptr;
+
+    check_args(argc, argv, 2,
+               {{{NAME_OPT, NAME_OPT_ALIAS},
+                 [&](std::string *current, std::string *next) {
+                     if (next == nullptr) return;
+                     delete name;
+                     name = new std::string(*next);
+                 }},
+                {{KEY_OPT, KEY_OPT_ALIAS},
+                 [&](std::string *current, std::string *next) {
+                     if (next != nullptr) key = *next;
+                 }}});
+
+    if (name == nullptr) {
+        name = new std::string("backup-");
+        *name += utils::now();
+    }
+
+    struct pass::passwords_data pd;
+    try {
+        pd = filestore.read_file(key);
+    } catch (std::exception const &err) {
+        wrong_key();
+    }
+
+    std::map<std::string, std::vector<pass::password>>::iterator i =
+        pd.backups.find(*name);
+    if (i != pd.backups.end())
+        exit_err(STRING(_s_error_backup_name_already_exists));
+
+    pd.backups[*name] = pd.passwords;
+    filestore.write_file(pd, key);
+
+    std::cout << STRING(_s_backup_created) << std::endl;
+}
+void list_backups(int argc, char **argv) {
+    std::string key = "";
+
+    check_args(argc, argv, 2,
+               {{{KEY_OPT, KEY_OPT_ALIAS},
+                 [&](std::string *current, std::string *next) {
+                     if (next != nullptr) key = *next;
+                 }}});
+
+    struct pass::passwords_data pd;
+    try {
+        pd = filestore.read_file(key);
+    } catch (std::exception const &err) {
+        wrong_key();
+    }
+
+    pretty_print_backups(pd.backups);
+}
+void remove_backup(int argc, char **argv) {
+    if (argc <= 2) not_enough_arguments();
+
+    std::string name = argv[2];
+    std::string key = "";
+
+    check_args(argc, argv, 3,
+               {{{KEY_OPT, KEY_OPT_ALIAS},
+                 [&](std::string *current, std::string *next) {
+                     if (next != nullptr) key = *next;
+                 }}});
+
+    struct pass::passwords_data pd;
+    try {
+        pd = filestore.read_file(key);
+    } catch (std::exception const &err) {
+        wrong_key();
+    }
+
+    std::map<std::string, std::vector<pass::password>>::iterator i =
+        pd.backups.find(name);
+    if (i == pd.backups.end())
+        exit_err(STRING(_s_error_backup_name_does_not_exist));
+
+    pd.backups.erase(i);
+    filestore.write_file(pd, key);
+
+    std::cout << STRING(_s_backup_removed) << std::endl;
+}
+void restore_backup(int argc, char **argv) {
+    if (argc <= 2) not_enough_arguments();
+
+    std::string name = argv[2];
+    std::string key = "";
+
+    check_args(argc, argv, 3,
+               {{{KEY_OPT, KEY_OPT_ALIAS},
+                 [&](std::string *current, std::string *next) {
+                     if (next != nullptr) key = *next;
+                 }}});
+
+    struct pass::passwords_data pd;
+    try {
+        pd = filestore.read_file(key);
+    } catch (std::exception const &err) {
+        wrong_key();
+    }
+
+    std::map<std::string, std::vector<pass::password>>::iterator i =
+        pd.backups.find(name);
+    if (i == pd.backups.end())
+        exit_err(STRING(_s_error_backup_name_does_not_exist));
+
+    pd.passwords = i->second;
+    filestore.write_file(pd, key);
+
+    std::cout << STRING(_s_backup_restored) << std::endl;
 }
 void share_passwords(int argc, char **argv) {
     std::string *port = nullptr;
@@ -532,7 +676,7 @@ void retrieve_passwords(int argc, char **argv) {
 
     std::string ip = argv[2];
     std::string *port = nullptr;
-    check_args(argc, argv, 2,
+    check_args(argc, argv, 3,
                {{{PORT_OPT}, [&](std::string *current, std::string *next) {
                      if (next == nullptr) return;
                      delete port;
@@ -562,7 +706,7 @@ void sync_passwords(int argc, char **argv) {
     std::string key = "";
     std::string remote_key = "";
     std::string *port = nullptr;
-    check_args(argc, argv, 2,
+    check_args(argc, argv, 3,
                {{{REMOTE_KEY_OPT},
                  [&](std::string *current, std::string *next) {
                      if (next != nullptr) remote_key = *next;
@@ -581,9 +725,9 @@ void sync_passwords(int argc, char **argv) {
     ri.custom_ip = ip;
     if (port != nullptr) ri.port = atoi(port->c_str());
 
-    std::vector<pass::password> new_passwords, current_passwords;
+    struct pass::passwords_data new_pd, current_pd;
     try {
-        new_passwords = sock::receive_passwords(ri, remote_key);
+        new_pd = sock::receive_passwords(ri, remote_key);
     } catch (std::exception const &err) {
         exit_err(STRING(_s_wrong_remote_address), 1);
     } catch (const char *err) {
@@ -591,28 +735,28 @@ void sync_passwords(int argc, char **argv) {
     }
 
     try {
-        current_passwords = filestore.read_file(key);
+        current_pd = filestore.read_file(key);
     } catch (std::exception const &err) {
         wrong_key();
     }
 
-    for (pass::password &p : new_passwords) {
+    for (pass::password &p : new_pd.passwords) {
         bool exists = false;
-        for (int i = 0; i < current_passwords.size(); i++) {
-            if ((p.get_group() == current_passwords[i].get_group()) &&
-                (p.get_user() == current_passwords[i].get_user())) {
-                if ((p.get_time() > current_passwords[i].get_time()))
-                    current_passwords[i].set_pass(p.get_pass());
+        for (int i = 0; i < current_pd.passwords.size(); i++) {
+            if ((p.get_group() == current_pd.passwords[i].get_group()) &&
+                (p.get_user() == current_pd.passwords[i].get_user())) {
+                if ((p.get_time() > current_pd.passwords[i].get_time()))
+                    current_pd.passwords[i].set_pass(p.get_pass());
 
                 exists = true;
                 break;
             }
         }
 
-        if (!exists) current_passwords.push_back(p);
+        if (!exists) current_pd.passwords.push_back(p);
     }
 
-    filestore.write_file(current_passwords, key);
+    filestore.write_file(current_pd, key);
     std::cout << STRING(_s_passwords_synced) << std::endl;
 }
 void change_key(int argc, char **argv) {
@@ -627,13 +771,13 @@ void change_key(int argc, char **argv) {
                      if (next != nullptr) new_key = *next;
                  }}});
 
-    std::vector<pass::password> passwords;
+    struct pass::passwords_data pd;
     try {
-        passwords = filestore.read_file(old_key);
+        pd = filestore.read_file(old_key);
     } catch (std::exception const &err) {
         wrong_key();
     }
-    filestore.write_file(passwords, new_key);
+    filestore.write_file(pd, new_key);
 
     std::cout << STRING(_s_key_changed) << std::endl;
 }

@@ -47,11 +47,11 @@ class filestore {
         return cypher_str;
     }
 
-    void write_file(std::vector<pass::password>& passwords, std::string key) {
-        write_file_raw(pass::passwords_to_file_data(passwords, key));
+    void write_file(struct pass::passwords_data& pd, std::string key) {
+        write_file_raw(pass::passwords_to_file_data(pd, key));
     }
 
-    std::vector<pass::password> read_file(std::string key) {
+    struct pass::passwords_data read_file(std::string key) {
         std::string cypher_str;
         try {
             cypher_str = read_file_raw();

@@ -165,7 +165,7 @@ std::string receive_passwords_raw(struct receive_info ri) {
     while (read(sock, buffer, BUFFER_SIZE)) res += std::string(buffer);
     return b64::decode(res);
 }
-std::vector<pass::password> receive_passwords(struct receive_info ri,
+struct pass::passwords_data receive_passwords(struct receive_info ri,
                                               std::string key) {
     std::string passwords_raw = receive_passwords_raw(ri);
     return pass::file_data_to_passwords(passwords_raw, key);
