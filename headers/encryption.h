@@ -1,13 +1,16 @@
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-
 #include <cryptopp/aes.h>
+#include <cryptopp/base64.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/hkdf.h>
 #include <cryptopp/modes.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/rsa.h>
 #include <cryptopp/sha.h>
+
+#include <iomanip>
+#include <iostream>
 
 #define KEYLENGTH CryptoPP::AES::MAX_KEYLENGTH
 #define IVLENGTH CryptoPP::AES::BLOCKSIZE
@@ -81,6 +84,65 @@ std::string decrypt(std::string cypher_str, std::string pass) {
     stf_decryptor.MessageEnd();
 
     return decrypted_str;
+}
+
+void generate_private_and_public_keys(std::string* private_key,
+                                      std::string* public_key) {
+    CryptoPP::AutoSeededRandomPool rng;
+    CryptoPP::InvertibleRSAFunction params;
+    params.GenerateRandomWithKeySize(rng, 3072);
+
+    CryptoPP::RSA::PrivateKey privkey(params);
+    CryptoPP::RSA::PublicKey pubkey(params);
+
+    CryptoPP::Base64Encoder privkeysink(new CryptoPP::StringSink(*private_key));
+    privkey.DEREncode(privkeysink);
+    privkeysink.MessageEnd();
+
+    CryptoPP::Base64Encoder pubkeysink(new CryptoPP::StringSink(*public_key));
+    pubkey.DEREncode(pubkeysink);
+    pubkeysink.MessageEnd();
+}
+std::string encrypt_with_public_key(std::string message,
+                                    std::string public_key) {
+    CryptoPP::AutoSeededRandomPool rng;
+
+    CryptoPP::RSA::PublicKey key;
+    CryptoPP::ByteQueue bytes;
+    CryptoPP::StringSource src(public_key, true, new CryptoPP::Base64Decoder);
+    src.TransferTo(bytes);
+    bytes.MessageEnd();
+    key.Load(bytes);
+
+    CryptoPP::RSAES_PKCS1v15_Encryptor e(key);
+    std::string encrypted_message;
+
+    CryptoPP::StringSource(
+        message, true,
+        new CryptoPP::PK_EncryptorFilter(
+            rng, e, new CryptoPP::StringSink(encrypted_message)));
+
+    return encrypted_message;
+}
+std::string decrypt_with_private_key(std::string encrypted_message,
+                                     std::string private_key) {
+    CryptoPP::AutoSeededRandomPool rng;
+
+    CryptoPP::RSA::PrivateKey key;
+    CryptoPP::ByteQueue bytes;
+    CryptoPP::StringSource src(private_key, true, new CryptoPP::Base64Decoder);
+    src.TransferTo(bytes);
+    bytes.MessageEnd();
+    key.Load(bytes);
+
+    CryptoPP::RSAES_PKCS1v15_Decryptor d(key);
+    std::string message;
+
+    CryptoPP::StringSource(encrypted_message, true,
+                           new CryptoPP::PK_DecryptorFilter(
+                               rng, d, new CryptoPP::StringSink(message)));
+
+    return message;
 }
 
 }  // namespace enc
